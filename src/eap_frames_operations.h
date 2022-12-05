@@ -1,13 +1,12 @@
 #ifndef EAP_FRAMES_OPERATIONS_
 #define EAP_FRAMES_OPERATIONS_
 
+#include <pcap/pcap.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
 #include <unistd.h>
-
-#include <pcap/pcap.h>
 
 #include "construct_eap_frames.h"
 #include "functions.h"
@@ -26,11 +25,13 @@ typedef enum {
   ERROR
 } SEND_FRAME_TYPE;
 
-const static unsigned SNAP_LENGTH = 2048; // snapshot length
-//const static unsigned EAP_ID_ADDRESS = 0x13; // eap id address in EAP-IDENTITY frame
+const static unsigned SNAP_LENGTH = 2048;  // snapshot length
+// const static unsigned EAP_ID_ADDRESS = 0x13; // eap id address in
+// EAP-IDENTITY frame
 
 int capture_eap_frames();
-static void determine_eap_frame_type_then_response_eap_frame(u_char *args, const struct pcap_pkthdr* header, const uint8_t *frame);
+static void determine_eap_frame_type_then_response_eap_frame(
+    u_char *args, const struct pcap_pkthdr *header, const uint8_t *frame);
 int send_eap_frame(SEND_FRAME_TYPE type, const uint8_t *frame);
 
 static void type_req_idnty_action(const uint8_t *frame);

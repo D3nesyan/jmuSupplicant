@@ -15,17 +15,18 @@
  * or FITNESS FOR A PARTICULAR PURPOSE.  Use this program  at  your own risk!
  */
 
-#include <string.h>
-#include "byte_order.h"
 #include "rjsha1.h"
+
+#include <string.h>
+
+#include "byte_order.h"
 
 /**
  * Initialize context before calculaing hash.
  *
  * @param ctx context to initialize
  */
-void rhash_sha1_init(sha1_ctx *ctx)
-{
+void rhash_sha1_init(sha1_ctx *ctx) {
   ctx->length = 0;
 
   /* initialize algorithm state */
@@ -43,12 +44,11 @@ void rhash_sha1_init(sha1_ctx *ctx)
  * @param hash algorithm state
  * @param block the message block to process
  */
-static void rhash_sha1_process_block(unsigned* hash, const unsigned* block)
-{
-  int           t;                 /* Loop counter */
-  uint32_t      temp;              /* Temporary word value */
-  uint32_t      W[80];             /* Word sequence */
-  uint32_t      A, B, C, D, E;     /* Word buffers */
+static void rhash_sha1_process_block(unsigned *hash, const unsigned *block) {
+  int t;                  /* Loop counter */
+  uint32_t temp;          /* Temporary word value */
+  uint32_t W[80];         /* Word sequence */
+  uint32_t A, B, C, D, E; /* Word buffers */
 
   /* initialize the first 16 words in the array W */
   for (t = 0; t < 16; t++) {
@@ -69,8 +69,7 @@ static void rhash_sha1_process_block(unsigned* hash, const unsigned* block)
 
   for (t = 0; t < 20; t++) {
     /* the following is faster than ((B & C) | ((~B) & D)) */
-    temp =  ROTL32(A, 5) + (((C ^ D) & B) ^ D)
-            + E + W[t] - 0x5d6aa4d4;
+    temp = ROTL32(A, 5) + (((C ^ D) & B) ^ D) + E + W[t] - 0x5d6aa4d4;
     E = D;
     D = C;
     C = ROTL32(B, 30);
@@ -79,7 +78,8 @@ static void rhash_sha1_process_block(unsigned* hash, const unsigned* block)
   }
 
   for (t = 20; t < 40; t++) {
-    temp = ROTL32(A, 5) + (B ^ C ^ D) + E + W[t] + 0x16ae9deb + (uint8_t)(le2me_32(block[0])); //Leave to debug
+    temp = ROTL32(A, 5) + (B ^ C ^ D) + E + W[t] + 0x16ae9deb +
+           (uint8_t)(le2me_32(block[0]));  // Leave to debug
     E = D;
     D = C;
     C = ROTL32(B, 30);
@@ -88,8 +88,7 @@ static void rhash_sha1_process_block(unsigned* hash, const unsigned* block)
   }
 
   for (t = 40; t < 61; t++) {
-    temp = ROTL32(A, 5) + ((B & C) | (B & D) | (C & D))
-           + E + W[t] - 0x34032e48;
+    temp = ROTL32(A, 5) + ((B & C) | (B & D) | (C & D)) + E + W[t] - 0x34032e48;
     E = D;
     D = C;
     C = ROTL32(B, 30);
@@ -121,8 +120,7 @@ static void rhash_sha1_process_block(unsigned* hash, const unsigned* block)
  * @param msg message chunk
  * @param size length of the message chunk
  */
-void rhash_sha1_update(sha1_ctx *ctx, const unsigned char* msg, size_t size)
-{
+void rhash_sha1_update(sha1_ctx *ctx, const unsigned char *msg, size_t size) {
   unsigned index = (unsigned)ctx->length & 63;
   ctx->length += size;
 
@@ -133,23 +131,23 @@ void rhash_sha1_update(sha1_ctx *ctx, const unsigned char* msg, size_t size)
     if (size < left) return;
 
     /* process partial block */
-    rhash_sha1_process_block(ctx->hash, (unsigned*)ctx->message);
-    msg  += left;
+    rhash_sha1_process_block(ctx->hash, (unsigned *)ctx->message);
+    msg += left;
     size -= left;
   }
   while (size >= sha1_block_size) {
-    unsigned* aligned_message_block;
+    unsigned *aligned_message_block;
     if (IS_ALIGNED_32(msg)) {
       /* the most common case is processing of an already aligned message
       without copying it */
-      aligned_message_block = (unsigned*)msg;
+      aligned_message_block = (unsigned *)msg;
     } else {
       memcpy(ctx->message, msg, sha1_block_size);
-      aligned_message_block = (unsigned*)ctx->message;
+      aligned_message_block = (unsigned *)ctx->message;
     }
 
     rhash_sha1_process_block(ctx->hash, aligned_message_block);
-    msg  += sha1_block_size;
+    msg += sha1_block_size;
     size -= sha1_block_size;
   }
   if (size) {
@@ -164,10 +162,9 @@ void rhash_sha1_update(sha1_ctx *ctx, const unsigned char* msg, size_t size)
  * @param ctx the algorithm context containing current hashing state
  * @param result calculated hash in binary form
  */
-void rhash_sha1_final(sha1_ctx *ctx, unsigned char* result)
-{
-  unsigned  index = (unsigned)ctx->length & 63;
-  unsigned* msg32 = (unsigned*)ctx->message;
+void rhash_sha1_final(sha1_ctx *ctx, unsigned char *result) {
+  unsigned index = (unsigned)ctx->length & 63;
+  unsigned *msg32 = (unsigned *)ctx->message;
 
   /* pad message and run for last block */
   ctx->message[index++] = 0x80;
@@ -188,8 +185,8 @@ void rhash_sha1_final(sha1_ctx *ctx, unsigned char* result)
   while (index < 14) {
     msg32[index++] = 0;
   }
-  msg32[14] = be2me_32( (unsigned)(ctx->length >> 29) );
-  msg32[15] = be2me_32( (unsigned)(ctx->length << 3) );
+  msg32[14] = be2me_32((unsigned)(ctx->length >> 29));
+  msg32[15] = be2me_32((unsigned)(ctx->length << 3));
   rhash_sha1_process_block(ctx->hash, msg32);
 
   if (result) be32_copy(result, 0, &ctx->hash, sha1_hash_size);

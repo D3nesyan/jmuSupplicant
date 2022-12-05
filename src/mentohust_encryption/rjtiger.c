@@ -16,17 +16,18 @@
  * or FITNESS FOR A PARTICULAR PURPOSE.  Use this program  at  your own risk!
  */
 
-#include <string.h>
-#include "byte_order.h"
 #include "rjtiger.h"
+
+#include <string.h>
+
+#include "byte_order.h"
 
 /**
  * Initialize algorithm context before calculaing hash.
  *
  * @param ctx context to initialize
  */
-void rhash_tiger_init(tiger_ctx *ctx)
-{
+void rhash_tiger_init(tiger_ctx *ctx) {
   ctx->length = 0;
   ctx->tiger2 = 0;
 
@@ -44,61 +45,52 @@ extern uint64_t rhash_tiger_sboxes[4][256];
 #define t4 rhash_tiger_sboxes[3]
 
 #ifdef CPU_X64 /* for x86-64 */
-#define round(a,b,c,x,mul) \
-	c ^= x; \
-	a -= t1[(uint8_t)(c)] ^ \
-		t2[(uint8_t)((c) >> (2 * 8))] ^ \
-		t3[(uint8_t)((c) >> (4 * 8))] ^ \
-		t4[(uint8_t)((c) >> (6 * 8))] ; \
-	b += t4[(uint8_t)((c) >> (1 * 8))] ^ \
-		t3[(uint8_t)((c) >> (3 * 8))] ^ \
-		t2[(uint8_t)((c) >> (5 * 8))] ^ \
-		t1[(uint8_t)((c) >> (7 * 8))]; \
-	b *= mul;
+#define round(a, b, c, x, mul)                                         \
+  c ^= x;                                                              \
+  a -= t1[(uint8_t)(c)] ^ t2[(uint8_t)((c) >> (2 * 8))] ^              \
+       t3[(uint8_t)((c) >> (4 * 8))] ^ t4[(uint8_t)((c) >> (6 * 8))];  \
+  b += t4[(uint8_t)((c) >> (1 * 8))] ^ t3[(uint8_t)((c) >> (3 * 8))] ^ \
+       t2[(uint8_t)((c) >> (5 * 8))] ^ t1[(uint8_t)((c) >> (7 * 8))];  \
+  b *= mul;
 
 #else /* for IA32 */
 
-#define round(a,b,c,x,mul) \
-	c ^= x; \
-	a -= t1[(uint8_t)(c)] ^ \
-		t2[(uint8_t)(((uint32_t)(c)) >> (2 * 8))] ^ \
-		t3[(uint8_t)((c) >> (4 * 8))] ^ \
-		t4[(uint8_t)(((uint32_t)((c) >> (4 * 8))) >> (2 * 8))] ; \
-	b += t4[(uint8_t)(((uint32_t)(c)) >> (1 * 8))] ^ \
-		t3[(uint8_t)(((uint32_t)(c)) >> (3 * 8))] ^ \
-		t2[(uint8_t)(((uint32_t)((c) >> (4 * 8))) >> (1 * 8))] ^ \
-		t1[(uint8_t)(((uint32_t)((c) >> (4 * 8))) >> (3 * 8))]; \
-	b *= mul;
+#define round(a, b, c, x, mul)                                        \
+  c ^= x;                                                             \
+  a -= t1[(uint8_t)(c)] ^ t2[(uint8_t)(((uint32_t)(c)) >> (2 * 8))] ^ \
+       t3[(uint8_t)((c) >> (4 * 8))] ^                                \
+       t4[(uint8_t)(((uint32_t)((c) >> (4 * 8))) >> (2 * 8))];        \
+  b += t4[(uint8_t)(((uint32_t)(c)) >> (1 * 8))] ^                    \
+       t3[(uint8_t)(((uint32_t)(c)) >> (3 * 8))] ^                    \
+       t2[(uint8_t)(((uint32_t)((c) >> (4 * 8))) >> (1 * 8))] ^       \
+       t1[(uint8_t)(((uint32_t)((c) >> (4 * 8))) >> (3 * 8))];        \
+  b *= mul;
 #endif /* CPU_X64 */
 
-#define pass(a,b,c,mul) \
-	round(a,b,c,x0,mul) \
-	round(b,c,a,x1,mul) \
-	round(c,a,b,x2,mul) \
-	round(a,b,c,x3,mul) \
-	round(b,c,a,x4,mul) \
-	round(c,a,b,x5,mul) \
-	round(a,b,c,x6,mul) \
-	round(b,c,a,x7,mul)
+#define pass(a, b, c, mul)                                                    \
+  round(a, b, c, x0, mul) round(b, c, a, x1, mul) round(c, a, b, x2, mul)     \
+      round(a, b, c, x3, mul) round(b, c, a, x4, mul) round(c, a, b, x5, mul) \
+          round(a, b, c, x6, mul) round(b, c, a, x7, mul)
 
-#define key_schedule { \
-	x0 -= x7 ^ I64(0xA5A5B5A5A5A5A7A5); \
-	x1 ^= x0; \
-	x2 += x1; \
-	x3 -= x2 ^ ((~x1)<<19); \
-	x4 ^= x3; \
-	x5 += x4; \
-	x6 -= x5 ^ ((~x4)>>23); \
-	x7 ^= x6; \
-	x0 += x7; \
-	x1 -= x0 ^ ((~x7)<<19); \
-	x2 ^= x1; \
-	x3 += x2; \
-	x4 -= x3 ^ ((~x2)>>23); \
-	x5 ^= x4; \
-	x6 += x5; \
-	x7 -= x6 ^ I64(0x0123456789ABCDEF); \
-}
+#define key_schedule                    \
+  {                                     \
+    x0 -= x7 ^ I64(0xA5A5B5A5A5A5A7A5); \
+    x1 ^= x0;                           \
+    x2 += x1;                           \
+    x3 -= x2 ^ ((~x1) << 19);           \
+    x4 ^= x3;                           \
+    x5 += x4;                           \
+    x6 -= x5 ^ ((~x4) >> 23);           \
+    x7 ^= x6;                           \
+    x0 += x7;                           \
+    x1 -= x0 ^ ((~x7) << 19);           \
+    x2 ^= x1;                           \
+    x3 += x2;                           \
+    x4 -= x3 ^ ((~x2) >> 23);           \
+    x5 ^= x4;                           \
+    x6 += x5;                           \
+    x7 -= x6 ^ I64(0x0123456789ABCDEF); \
+  }
 
 /**
  * The core transformation. Process a 512-bit block.
@@ -106,8 +98,7 @@ extern uint64_t rhash_tiger_sboxes[4][256];
  * @param state the algorithm state
  * @param block the message block to process
  */
-static void rhash_tiger_process_block(uint64_t state[3], uint64_t* block)
-{
+static void rhash_tiger_process_block(uint64_t state[3], uint64_t *block) {
   /* Optimized for GCC IA32.
      The order of declarations is important for compiler. */
   uint64_t a, b, c;
@@ -162,8 +153,7 @@ static void rhash_tiger_process_block(uint64_t state[3], uint64_t* block)
  * @param msg message chunk
  * @param size length of the message chunk
  */
-void rhash_tiger_update(tiger_ctx *ctx, const unsigned char* msg, size_t size)
-{
+void rhash_tiger_update(tiger_ctx *ctx, const unsigned char *msg, size_t size) {
   size_t index = (size_t)ctx->length & 63;
   ctx->length += size;
 
@@ -175,7 +165,7 @@ void rhash_tiger_update(tiger_ctx *ctx, const unsigned char* msg, size_t size)
       return;
     } else {
       memcpy(ctx->message + index, msg, left);
-      rhash_tiger_process_block(ctx->hash, (uint64_t*)ctx->message);
+      rhash_tiger_process_block(ctx->hash, (uint64_t *)ctx->message);
       msg += left;
       size -= left;
     }
@@ -184,10 +174,10 @@ void rhash_tiger_update(tiger_ctx *ctx, const unsigned char* msg, size_t size)
     if (IS_ALIGNED_64(msg)) {
       /* the most common case is processing of an already aligned message
       without copying it */
-      rhash_tiger_process_block(ctx->hash, (uint64_t*)msg);
+      rhash_tiger_process_block(ctx->hash, (uint64_t *)msg);
     } else {
       memcpy(ctx->message, msg, tiger_block_size);
-      rhash_tiger_process_block(ctx->hash, (uint64_t*)ctx->message);
+      rhash_tiger_process_block(ctx->hash, (uint64_t *)ctx->message);
     }
 
     msg += tiger_block_size;
@@ -205,10 +195,9 @@ void rhash_tiger_update(tiger_ctx *ctx, const unsigned char* msg, size_t size)
  * @param ctx the algorithm context containing current hashing state
  * @param result calculated hash in binary form
  */
-void rhash_tiger_final(tiger_ctx *ctx, unsigned char result[24])
-{
+void rhash_tiger_final(tiger_ctx *ctx, unsigned char result[24]) {
   unsigned index = (unsigned)ctx->length & 63;
-  uint64_t* msg64 = (uint64_t*)ctx->message;
+  uint64_t *msg64 = (uint64_t *)ctx->message;
 
   /* pad message and run for last block */
 

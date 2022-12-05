@@ -24,15 +24,15 @@ documentation and/or software.*/
 
 /* MD5 context. */
 typedef struct {
-  UINT4 state[4];								   /* state (ABCD) */
-  UINT4 count[2];		/* number of bits, modulo 2^64 (lsb first) */
-  UCHAR buffer[64];						 /* input buffer */
+  UINT4 state[4];   /* state (ABCD) */
+  UINT4 count[2];   /* number of bits, modulo 2^64 (lsb first) */
+  UCHAR buffer[64]; /* input buffer */
 } MD5_CTX;
 
-void MD5Init(MD5_CTX * context);
+void MD5Init(MD5_CTX *context);
 void MD5Update(MD5_CTX *context, UCHAR *input, UINT4 inputLen);
 void MD5Final(UCHAR digest[16], MD5_CTX *context);
 
-UCHAR* ComputeHash(UCHAR *src, UINT4 len);
+UCHAR *ComputeHash(UCHAR *src, UINT4 len);
 
 #endif /* MD5_H */
