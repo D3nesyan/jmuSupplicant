@@ -59,7 +59,7 @@ static void ShowUsage()
           "\t--interface_card      指定 网卡名称，则程序中不再要求用户手动选择网卡\n\n" 
           "\t-n                    开启 midnight 模式,断网后使用。\n\n"
 
-          "\t-b, --background      认证成功后,jmuSupplicant进入 dameon 模式,后台运行。\n\n"
+          "\t-b, --background      认证成功后,jmuSupplicant进入 daemon 模式,后台运行。\n\n"
 
           "\t-k                    停止正在运行的 jmuSupplicant。\n\n"
 
