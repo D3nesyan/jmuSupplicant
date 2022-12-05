@@ -51,9 +51,9 @@ static void ShowUsage() {
       "0(教育网),1(联通宽带接入),2(移动宽带接入),3(电信宽带接入)	\n\n"
       "\n"
       "  可选参数:\n\n"
-      //      "\t-g, --gateway         指定 Gateway(网关) 地址。 \n\n"
+      "\t-g, --gateway         指定 Gateway(网关) 地址。 \n\n"
 
-      //       "\t-d, --dns             指定 DNS 服务器地址。 \n\n"
+      "\t-d, --dns             指定 DNS 服务器地址。 \n\n"
 
       "\t--ip                  指定 ip 地址,推荐配合 mignight 模式中使用。 \n\n"
       "\t--mask                指定 Netmask(子网遮罩) 地址。 \n\n"
