@@ -32,7 +32,7 @@
 #include "init.h"
 #include "eap_frames_operations.h"
 
-const static char LOCK_FILE_PATH[23] = "/var/run/test_lock.pid";
+const static char LOCK_FILE_PATH[32] = "/var/run/jmusupplicant_lock.pid";
 
 int fd = -1; // lock file descriptor
 
