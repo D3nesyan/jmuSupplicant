@@ -227,12 +227,12 @@ int relogin_when_receive_failure_frame() {
   extern NIC_STRUCT nic_info;
   extern SEND_FRAME_TYPE current_state;
 
-  static unsigned int relogin_number = 0;  // 重认证次数,超过5次停止重认证
+  static unsigned int relogin_number = 0;  // 重认证次数,超过2次停止重认证
 
-  if (relogin_number > 5) {
+  if (relogin_number > 2) {
     fprintf(stdout,
-            "\n\nregloin over 5 times, please check your username, "
-            "password or service name\n\n");
+            "\n\nregloin over 2 times, please check your username, "
+            "password or service name.\n\n");
     exit(1);
   }
   fprintf(stdout, "\n\nThe program is running relogin function.\n\n\n");
